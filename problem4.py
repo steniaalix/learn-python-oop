@@ -8,9 +8,18 @@ class InsufficientBalanceError(Exception):
 
 class MenuItem(ABC):
     def __init__(self,name,price,quantity):
+
+        if price <=0:
+            raise ValueError("price must be positive")
+        
+        if quantity<0:
+            raise ValueError("Quantity can not be negative")
+        
         self.name=name
         self.price=price
         self.quantity=quantity
+
+
     def __str__(self):
         return(f"Name: {self.name}|"
               f"Price: {self.price}|"
@@ -23,7 +32,7 @@ class MenuItem(ABC):
 
 class VegItem(MenuItem):
     def __init__(self,name,price,quantity,calories):
-        super().__init(name,price,quantity)
+        super().__init__(name,price,quantity)
         self.calories=calories
     def prepare(self):
         print("Cooking veg food....")
@@ -47,6 +56,9 @@ class Beverage(MenuItem):
 
 class Customer:
     def __init__(self,name,wallet_balance):
+        if wallet_balance <0:
+            raise ValueError("Balance can not be negative")
+        
         self.name=name
         self.wallet_balance=wallet_balance
         self.cart=[]
@@ -56,7 +68,14 @@ class Customer:
             raise ValueError("Item already in cart")
         self.cart.append(item)
 
+        print(f"{item.name} added to cart")
+
     def view_cart(self):
+        if len(self.cart)==0:
+            print("The cart is empty")
+
+            return
+        
         for item in self.cart:
             print(item)
 
@@ -80,20 +99,72 @@ class Restaurant:
             print(f"{item.name}||Rs.{item.price}")
 
     def place_order(self,customer):
+                if len(customer.cart)==0:
+                    raise ValueError("Cart is empty")
+                
                 total=0
                 for item in customer.cart:
                     if item.quantity==0:
                         raise OutOfStockError(f"{item.name} is out of stock")
                     total+=item.price
-                    item.prepare()
+
                 if customer.wallet_balance<total:
                     raise InsufficientBalanceError("The balance is insufficient")
-                print("The orderr was successful!!!")
+                print("The order was successful!!!")
                 customer.wallet_balance-=total
                 item.quantity-=1
                 customer.cart.clear()
 
 
+restaurant=Restaurant()
+
+v1 = VegItem(
+    "Paneer Pizza",
+    250,
+    5,
+    700
+)
+
+n1 = NonVegItem(
+    "Chicken Burger",
+    180,
+    3,
+    35
+)
+
+b1 = Beverage(
+    "Coke",
+    50,
+    10,
+    500
+)
+
+restaurant.add_item(v1)
+restaurant.add_item(n1)
+restaurant.add_item(b1)
+
+c1=Customer("Steni",1000)
+
+restaurant.add_customer(c1)
+
+restaurant.show_menu()
 
 
+try:
+    c1.add_to_cart(v1)
+    c1.add_to_cart(n1)
+    c1.add_to_cart(b1)
+
+except ValueError as e:
+    print(f"Error: {e}")
+
+c1.view_cart()
+
+try:
+    restaurant.place_order(c1)
+
+except (OutOfStockError,InsufficientBalanceError,ValueError) as e:
+    print(f"Error: {e}")
+
+restaurant.show_menu()
 
