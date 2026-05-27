@@ -1,5 +1,5 @@
 import random
-'''
+
 class Dice:
     def roll(self):
         return random.randint(1,6)
@@ -24,7 +24,7 @@ lst=[1,2,3,4,5,6,7,8,'a','s','d','f','g','h','j',"k","!","@","+","%","^"]
 password=random.choices(lst,k=7)
 print(password)
 
-'''
+
 
 play='yes'
 while play=='yes':
